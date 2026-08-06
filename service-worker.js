@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dryline-calc-v1';
+const CACHE_NAME = 'dryline-calc-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -7,6 +7,8 @@ const ASSETS = [
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
 ];
+// Note: PDF floor-plan support loads pdf.js from a CDN at runtime and
+// requires an internet connection the first time it's used per session.
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

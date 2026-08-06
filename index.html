@@ -7,7 +7,7 @@
 
 <!-- PWA / iOS home screen support -->
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#14181C" />
+<meta name="theme-color" content="#0A0A0B" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Dryline" />
@@ -22,15 +22,30 @@
   html, body { margin: 0; padding: 0; }
 
   :root {
-    --bg: #14181C;
-    --panel: #1B2025;
-    --panel-raised: #20262C;
-    --border: #2B323A;
-    --orange: #E0632B;
-    --amber: #E8A34F;
-    --steel: #7A8794;
-    --text: #EDEFF2;
-    --text-dim: #9AA4AE;
+    --bg: #0A0A0B;
+    --panel: #131315;
+    --panel-raised: #1A1A1D;
+    --border: #2A2A2E;
+    --gold: #C9A44C;
+    --gold-bright: #E4C878;
+    --steel: #8A8A8F;
+    --text: #F5F4F1;
+    --text-dim: #9C9B9F;
+    --shadow: rgba(0,0,0,0.4);
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    --bg: #FAF9F6;
+    --panel: #FFFFFF;
+    --panel-raised: #F2F0EA;
+    --border: #E2DFD5;
+    --gold: #A9812F;
+    --gold-bright: #8C6B23;
+    --steel: #6B6A63;
+    --text: #17171A;
+    --text-dim: #6E6D68;
+    --shadow: rgba(20,20,15,0.08);
+    color-scheme: light;
   }
 
   body {
@@ -46,6 +61,7 @@
     background-size: 40px 40px;
     background-position: -1px -1px;
     -webkit-overflow-scrolling: touch;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   .shell { max-width: 640px; margin: 0 auto; }
@@ -67,7 +83,17 @@
     margin: 0;
     line-height: 1.2;
   }
-  .header h1 span { color: var(--orange); }
+  .header h1 span { color: var(--gold); }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .theme-toggle {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--panel); border: 1px solid var(--border);
+    color: var(--gold); font-size: 15px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 3px var(--shadow);
+    transition: transform 0.15s, background 0.2s;
+  }
+  .theme-toggle:active { transform: scale(0.92); }
   .header .sub {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
@@ -78,9 +104,18 @@
   .panel {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 18px;
     margin-bottom: 16px;
+    box-shadow: 0 2px 10px var(--shadow);
+    position: relative;
+  }
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 18px; right: 18px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.55;
   }
 
   .panel-title {
@@ -91,7 +126,7 @@
     color: var(--steel);
     margin-bottom: 16px;
   }
-  .panel-title .dot { color: var(--orange); }
+  .panel-title .dot { color: var(--gold); }
 
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 
@@ -111,7 +146,7 @@
     border-radius: 4px;
     overflow: hidden;
   }
-  .field-input:focus-within { border-color: var(--orange); }
+  .field-input:focus-within { border-color: var(--gold); }
   .field-input input {
     flex: 1;
     background: transparent;
@@ -159,12 +194,12 @@
     background: var(--panel-raised); border: 1px solid var(--border);
     position: relative; cursor: pointer; transition: background 0.15s;
   }
-  .toggle.on { background: var(--orange); border-color: var(--orange); }
+  .toggle.on { background: var(--gold); border-color: var(--gold); }
   .toggle .knob {
     width: 18px; height: 18px; border-radius: 50%; background: var(--text);
     position: absolute; top: 3px; left: 3px; transition: left 0.15s;
   }
-  .toggle.on .knob { left: 22px; background: #14181C; }
+  .toggle.on .knob { left: 22px; background: #0A0A0B; }
 
   .layer-toggle { display: flex; gap: 8px; margin-bottom: 10px; }
   .layer-btn {
@@ -173,7 +208,7 @@
     border-radius: 4px; font-family: 'IBM Plex Mono', monospace;
     font-size: 12px; color: var(--text-dim); cursor: pointer;
   }
-  .layer-btn.active { border-color: var(--orange); color: var(--orange); background: rgba(224,99,43,0.08); }
+  .layer-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,164,76,0.10); }
 
   .advanced-toggle {
     display: flex; align-items: center; gap: 6px; font-size: 11px;
@@ -188,14 +223,14 @@
     font-family: 'Oswald', sans-serif; font-size: 12px; text-transform: uppercase;
     letter-spacing: 1.5px; color: var(--steel); margin: 0;
   }
-  .docket-header h2 .dot { color: var(--orange); }
+  .docket-header h2 .dot { color: var(--gold); }
 
   .copy-btn {
     background: transparent; border: 1px solid var(--border); color: var(--text-dim);
     font-size: 11px; padding: 7px 12px; border-radius: 4px; cursor: pointer;
     font-family: 'Inter', sans-serif;
   }
-  .copy-btn:active { border-color: var(--orange); color: var(--orange); }
+  .copy-btn:active { border-color: var(--gold); color: var(--gold); }
 
   .summary-band {
     background: var(--panel-raised); border: 1px solid var(--border); border-radius: 4px;
@@ -203,14 +238,14 @@
   }
   .summary-band .item { text-align: center; flex: 1; }
   .summary-band .item + .item { border-left: 1px solid var(--border); }
-  .summary-band .num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--amber); }
+  .summary-band .num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--gold-bright); }
   .summary-band .lbl { font-size: 8.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
   .stat-line { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); }
   .stat-line:last-child { border-bottom: none; }
   .stat-label { font-size: 13px; color: var(--text-dim); }
   .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text); }
-  .stat-value.hero { font-size: 24px; color: var(--orange); }
+  .stat-value.hero { font-size: 26px; color: var(--gold); text-shadow: 0 0 20px var(--shadow); }
   .stat-note { font-size: 9.5px; color: var(--text-dim); display: block; margin-top: 2px; }
 
   .footnote { font-size: 9.5px; color: var(--text-dim); margin-top: 14px; line-height: 1.6; font-family: 'IBM Plex Mono', monospace; }
@@ -218,10 +253,11 @@
   .scan-row { display: flex; gap: 8px; margin-top: 4px; margin-bottom: 10px; }
   .scan-btn {
     flex: 1; background: var(--panel-raised); border: 1px solid var(--border);
-    color: var(--amber); font-size: 11px; padding: 10px 4px; border-radius: 4px;
+    color: var(--gold-bright); font-size: 11px; padding: 10px 4px; border-radius: 4px;
     cursor: pointer; font-family: 'Inter', sans-serif; text-align: center;
   }
-  .scan-btn:active { border-color: var(--orange); }
+  .scan-btn:active { border-color: var(--gold); }
+  .plan-btn { color: var(--steel); }
 
   /* Scan modal */
   .scan-modal {
@@ -251,7 +287,7 @@
     border-top: 1px solid var(--border);
   }
   .scan-instructions .step-label {
-    font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--orange);
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold);
     text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
   }
   .scan-instructions .step-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
@@ -265,7 +301,7 @@
   .scan-ref-input label { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
   .scan-ref-input .field-input { flex: 1; }
   .scan-ref-input button {
-    background: var(--orange); border: none; color: #14181C; font-weight: 600;
+    background: var(--gold); border: none; color: #0A0A0B; font-weight: 600;
     padding: 10px 16px; border-radius: 4px; font-size: 12px; white-space: nowrap;
   }
 
@@ -278,13 +314,13 @@
     flex: 1; padding: 13px; border-radius: 4px; font-size: 13px; font-weight: 600;
     border: 1px solid var(--border); background: var(--panel-raised); color: var(--text-dim);
   }
-  .scan-action-btn.primary { background: var(--orange); border-color: var(--orange); color: #14181C; }
+  .scan-action-btn.primary { background: var(--gold); border-color: var(--gold); color: #0A0A0B; }
   .scan-action-btn:disabled { opacity: 0.4; }
 
   .scan-result-badge {
     position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-    background: rgba(20,24,28,0.9); border: 1px solid var(--orange);
-    color: var(--amber); font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    background: rgba(10,10,11,0.9); border: 1px solid var(--gold);
+    color: var(--gold-bright); font-family: 'IBM Plex Mono', monospace; font-size: 13px;
     padding: 6px 14px; border-radius: 20px; display: none;
   }
   .scan-result-badge.show { display: block; }
@@ -292,7 +328,7 @@
   .install-banner {
     display: none;
     background: var(--panel-raised);
-    border: 1px solid var(--orange);
+    border: 1px solid var(--gold);
     border-radius: 6px;
     padding: 12px 14px;
     margin-bottom: 16px;
@@ -301,14 +337,19 @@
     line-height: 1.5;
   }
   .install-banner.show { display: block; }
-  .install-banner b { color: var(--orange); }
+  .install-banner b { color: var(--gold); }
 </style>
 </head>
 <body>
   <div class="shell">
     <div class="header">
       <h1>DRYLINE<span>Ⓡ</span><br/>MATERIAL CALCULATOR</h1>
-      <div class="sub">TAKEOFF ENGINE</div>
+      <div class="header-right">
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light mode">
+          <span id="themeIcon">☾</span>
+        </button>
+        <div class="sub">TAKEOFF ENGINE</div>
+      </div>
     </div>
 
     <div id="installBanner" class="install-banner">
@@ -331,6 +372,9 @@
         <button id="scanLength" class="scan-btn" data-target="length">📷 Scan Length</button>
         <button id="scanWidth" class="scan-btn" data-target="width">📷 Scan Width</button>
         <button id="scanHeight" class="scan-btn" data-target="height">📷 Scan Height</button>
+      </div>
+      <div class="scan-row">
+        <button id="uploadPlanBtn" class="scan-btn plan-btn">📐 Upload Floor Plan</button>
       </div>
       <div class="field-row">
         <div class="field"><label>Doors</label><div class="field-input"><input id="doors" type="number" inputmode="numeric" value="1" step="1"/><span class="unit">qty</span></div></div>
@@ -442,12 +486,14 @@
 
     <div class="scan-bottombar">
       <input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none;" />
+      <input type="file" id="planFileInput" accept="image/*,application/pdf" style="display:none;" />
       <button class="scan-action-btn primary" id="scanCaptureBtn">Take Photo</button>
       <button class="scan-action-btn" id="scanUndoBtn" disabled>Undo Point</button>
       <button class="scan-action-btn primary" id="scanUseBtn" style="display:none;">Use This Measurement</button>
     </div>
   </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   const BOARDS = [
     { label: '2400 × 1200mm', area: 2.88 },
@@ -541,6 +587,38 @@ Wastage factored: ${r.wastage}%`;
 
   recalc();
 
+  // ---------- THEME TOGGLE ----------
+  (function () {
+    const root = document.documentElement;
+    const btn = $('themeToggle');
+    const icon = $('themeIcon');
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        root.setAttribute('data-theme', 'light');
+        icon.textContent = '☀';
+        metaTheme.setAttribute('content', '#FAF9F6');
+      } else {
+        root.removeAttribute('data-theme');
+        icon.textContent = '☾';
+        metaTheme.setAttribute('content', '#0A0A0B');
+      }
+    }
+
+    let stored = null;
+    try { stored = localStorage.getItem('dryline-theme'); } catch (e) {}
+    const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    applyTheme(stored || (prefersLight ? 'light' : 'dark'));
+
+    btn.addEventListener('click', () => {
+      const isLight = root.getAttribute('data-theme') === 'light';
+      const next = isLight ? 'dark' : 'light';
+      applyTheme(next);
+      try { localStorage.setItem('dryline-theme', next); } catch (e) {}
+    });
+  })();
+
   // Show "Add to Home Screen" hint on iOS Safari when not already installed
   function isIos() { return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase()); }
   function isInStandaloneMode() { return ('standalone' in window.navigator) && (window.navigator.standalone); }
@@ -557,12 +635,17 @@ Wastage factored: ${r.wastage}%`;
 
   // ---------- CAMERA SCAN / PHOTO-REFERENCE MEASURE ----------
   (function () {
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     const modal = $('scanModal');
     const stage = $('scanStage');
     const placeholder = $('scanPlaceholder');
     const canvas = $('scanCanvas');
     const ctx = canvas.getContext('2d');
     const fileInput = $('scanFileInput');
+    const planFileInput = $('planFileInput');
     const captureBtn = $('scanCaptureBtn');
     const undoBtn = $('scanUndoBtn');
     const useBtn = $('scanUseBtn');
@@ -576,17 +659,20 @@ Wastage factored: ${r.wastage}%`;
     const refConfirm = $('scanRefConfirm');
     const badge = $('scanBadge');
 
-    let targetField = null;   // 'length' | 'width' | 'height'
+    let mode = 'single';      // 'single' (one field) | 'floorplan' (length+width together)
+    let targetField = null;   // 'length' | 'width' | 'height' (single mode only)
     let img = null;
-    let points = [];          // pixel points clicked, up to 4: [refA, refB, measA, measB]
-    let stage_state = 'idle'; // idle -> photo -> ref-picking -> ref-set -> measuring -> done
+    let points = [];          // pixel points clicked
+    let stage_state = 'idle'; // idle -> ref-picking -> measuring -> done
     let pxPerMeter = null;
-    let scale = 1;            // canvas-to-natural-image scale
-    let lastMeasuredMeters = null;
+    let lastMeasuredMeters = null;   // single mode result
+    let lastLengthMeters = null;     // floorplan mode results
+    let lastWidthMeters = null;
 
-    function openModal(field) {
-      targetField = field;
-      title.textContent = 'Scan ' + field.charAt(0).toUpperCase() + field.slice(1);
+    function openModal(m, field) {
+      mode = m;
+      targetField = field || null;
+      title.textContent = mode === 'floorplan' ? 'Floor Plan Measure' : 'Scan ' + field.charAt(0).toUpperCase() + field.slice(1);
       resetState();
       modal.classList.add('open');
     }
@@ -599,51 +685,93 @@ Wastage factored: ${r.wastage}%`;
       img = null;
       pxPerMeter = null;
       lastMeasuredMeters = null;
+      lastLengthMeters = null;
+      lastWidthMeters = null;
       stage_state = 'idle';
       canvas.style.display = 'none';
       placeholder.style.display = 'block';
+      placeholder.innerHTML = mode === 'floorplan'
+        ? 'Upload a floor plan (image or PDF).<br/><br/>You\'ll calibrate against a printed dimension or scale bar, then mark two walls to get Length and Width.'
+        : 'Take a photo of the wall or floor, straight-on if possible.<br/><br/>You\'ll then mark a known reference length (a door, a board, a tape measure) to calibrate, then mark the distance you want to measure.';
       instructions.style.display = 'none';
       refInput.classList.remove('show');
       useBtn.style.display = 'none';
+      useBtn.textContent = 'Use This Measurement';
       captureBtn.style.display = 'block';
-      captureBtn.textContent = 'Take Photo';
+      captureBtn.textContent = mode === 'floorplan' ? 'Upload Plan' : 'Take Photo';
       undoBtn.disabled = true;
       badge.classList.remove('show');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    $('scanLength').addEventListener('click', () => openModal('length'));
-    $('scanWidth').addEventListener('click', () => openModal('width'));
-    $('scanHeight').addEventListener('click', () => openModal('height'));
+    $('scanLength').addEventListener('click', () => openModal('single', 'length'));
+    $('scanWidth').addEventListener('click', () => openModal('single', 'width'));
+    $('scanHeight').addEventListener('click', () => openModal('single', 'height'));
+    $('uploadPlanBtn').addEventListener('click', () => openModal('floorplan'));
     closeBtn.addEventListener('click', closeModal);
 
     captureBtn.addEventListener('click', () => {
-      if (stage_state === 'idle') {
-        fileInput.click();
-      }
+      if (stage_state !== 'idle') return;
+      if (mode === 'floorplan') planFileInput.click();
+      else fileInput.click();
     });
 
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
+    fileInput.addEventListener('change', (e) => loadImageFile(e.target.files[0], fileInput));
+    planFileInput.addEventListener('change', (e) => loadPlanFile(e.target.files[0], planFileInput));
+
+    function loadImageFile(file, inputEl) {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (ev) => {
         img = new Image();
-        img.onload = () => {
-          drawImageToCanvas();
-          placeholder.style.display = 'none';
-          canvas.style.display = 'block';
-          captureBtn.style.display = 'none';
-          instructions.style.display = 'block';
-          stage_state = 'ref-picking';
-          stepLabel.textContent = 'Step 1 of 2 — Calibrate';
-          stepText.textContent = 'Tap the two ends of something you know the real length of (a door, a board, a tape measure laid flat).';
-        };
+        img.onload = () => onImageReady();
         img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
-      fileInput.value = '';
-    });
+      inputEl.value = '';
+    }
+
+    function loadPlanFile(file, inputEl) {
+      if (!file) return;
+      if (file.type === 'application/pdf') {
+        placeholder.style.display = 'block';
+        placeholder.textContent = 'Loading PDF…';
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          try {
+            const pdf = await pdfjsLib.getDocument({ data: ev.target.result }).promise;
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 2.5 });
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = viewport.width;
+            tmpCanvas.height = viewport.height;
+            await page.render({ canvasContext: tmpCanvas.getContext('2d'), viewport }).promise;
+            img = new Image();
+            img.onload = () => onImageReady();
+            img.src = tmpCanvas.toDataURL('image/png');
+          } catch (err) {
+            placeholder.textContent = 'Could not read that PDF. Try exporting the plan as a JPG or PNG and upload that instead.';
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        loadImageFile(file, inputEl);
+      }
+      inputEl.value = '';
+    }
+
+    function onImageReady() {
+      drawImageToCanvas();
+      placeholder.style.display = 'none';
+      canvas.style.display = 'block';
+      captureBtn.style.display = 'none';
+      instructions.style.display = 'block';
+      stage_state = 'ref-picking';
+      stepLabel.textContent = mode === 'floorplan' ? 'Step 1 of 2 — Calibrate scale' : 'Step 1 of 2 — Calibrate';
+      stepText.textContent = mode === 'floorplan'
+        ? 'Tap the two ends of a printed dimension or scale bar on the plan.'
+        : 'Tap the two ends of something you know the real length of (a door, a board, a tape measure laid flat).';
+    }
 
     function drawImageToCanvas() {
       const maxW = stage.clientWidth;
@@ -651,29 +779,31 @@ Wastage factored: ${r.wastage}%`;
       const ratio = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight);
       canvas.width = img.naturalWidth * ratio;
       canvas.height = img.naturalHeight * ratio;
-      scale = ratio;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       redrawPoints();
     }
 
     function redrawPoints() {
-      // redraw base image
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       points.forEach((p, i) => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
-        ctx.fillStyle = i < 2 ? '#E8A34F' : '#E0632B';
+        ctx.fillStyle = i < 2 ? '#E4C878' : '#C9A44C';
         ctx.fill();
-        ctx.strokeStyle = '#14181C';
+        ctx.strokeStyle = '#0A0A0B';
         ctx.lineWidth = 2;
         ctx.stroke();
       });
-      // draw line for ref pair
-      if (points.length >= 2) {
-        drawLine(points[0], points[1], '#E8A34F');
+      if (points.length >= 2) drawLine(points[0], points[1], '#E4C878');
+
+      if (mode === 'single' && points.length >= 4) {
+        drawLine(points[2], points[3], '#C9A44C');
       }
-      if (points.length >= 4) {
-        drawLine(points[2], points[3], '#E0632B');
+      if (mode === 'floorplan' && points.length >= 3) {
+        drawLine(points[2], points[3] || points[2], '#C9A44C');
+      }
+      if (mode === 'floorplan' && points.length >= 4) {
+        drawLine(points[3], points[4] || points[3], '#8A8A8F');
       }
     }
 
@@ -714,11 +844,24 @@ Wastage factored: ${r.wastage}%`;
           }
         }
       } else if (stage_state === 'measuring') {
-        if (points.length < 4) {
-          points.push(p);
-          redrawPoints();
-          if (points.length === 4) {
-            finishMeasurement();
+        if (mode === 'single') {
+          if (points.length < 4) {
+            points.push(p);
+            redrawPoints();
+            if (points.length === 4) finishSingleMeasurement();
+          }
+        } else {
+          // floorplan: need 3 more points -> wallA-end, corner, wallB-end (points[2],[3],[4])
+          if (points.length < 5) {
+            points.push(p);
+            redrawPoints();
+            if (points.length === 3) {
+              stepText.textContent = 'Now tap the room corner (where the two walls meet).';
+            } else if (points.length === 4) {
+              stepText.textContent = 'Now tap the far end of the second wall.';
+            } else if (points.length === 5) {
+              finishFloorplanMeasurement();
+            }
           }
         }
       }
@@ -737,11 +880,16 @@ Wastage factored: ${r.wastage}%`;
 
       refInput.classList.remove('show');
       stage_state = 'measuring';
-      stepLabel.textContent = 'Step 2 of 2 — Measure';
-      stepText.textContent = 'Now tap the two points of the ' + targetField + ' you want to measure.';
+      if (mode === 'single') {
+        stepLabel.textContent = 'Step 2 of 2 — Measure';
+        stepText.textContent = 'Now tap the two points of the ' + targetField + ' you want to measure.';
+      } else {
+        stepLabel.textContent = 'Step 2 of 2 — Mark the walls';
+        stepText.textContent = 'Tap the start of the first wall (this will become Length).';
+      }
     });
 
-    function finishMeasurement() {
+    function finishSingleMeasurement() {
       const dx = points[3].x - points[2].x;
       const dy = points[3].y - points[2].y;
       const pxDist = Math.sqrt(dx * dx + dy * dy);
@@ -753,6 +901,26 @@ Wastage factored: ${r.wastage}%`;
       stepLabel.textContent = 'Done';
       stepText.textContent = 'Measured ' + meters.toFixed(2) + 'm. Looks right? Use it, or undo the last point to retry.';
       useBtn.style.display = 'block';
+      useBtn.textContent = 'Use This Measurement';
+      stage_state = 'done';
+    }
+
+    function distMeters(a, b) {
+      const dx = b.x - a.x, dy = b.y - a.y;
+      return Math.sqrt(dx * dx + dy * dy) / pxPerMeter;
+    }
+
+    function finishFloorplanMeasurement() {
+      // points: [ref0, ref1, wallAstart, corner, wallBend]
+      lastLengthMeters = distMeters(points[2], points[3]);
+      lastWidthMeters = distMeters(points[3], points[4]);
+
+      badge.textContent = 'L ' + lastLengthMeters.toFixed(2) + 'm  ×  W ' + lastWidthMeters.toFixed(2) + 'm';
+      badge.classList.add('show');
+      stepLabel.textContent = 'Done';
+      stepText.textContent = 'Length ' + lastLengthMeters.toFixed(2) + 'm, Width ' + lastWidthMeters.toFixed(2) + 'm. Looks right? Use both, or undo to retry.';
+      useBtn.style.display = 'block';
+      useBtn.textContent = 'Use Length & Width';
       stage_state = 'done';
     }
 
@@ -766,24 +934,35 @@ Wastage factored: ${r.wastage}%`;
       if (points.length < 2) {
         stage_state = 'ref-picking';
         refInput.classList.remove('show');
-        stepLabel.textContent = 'Step 1 of 2 — Calibrate';
-        stepText.textContent = 'Tap the two ends of something you know the real length of.';
+        stepLabel.textContent = mode === 'floorplan' ? 'Step 1 of 2 — Calibrate scale' : 'Step 1 of 2 — Calibrate';
+        stepText.textContent = mode === 'floorplan'
+          ? 'Tap the two ends of a printed dimension or scale bar on the plan.'
+          : 'Tap the two ends of something you know the real length of.';
       } else if (points.length === 2) {
         stage_state = 'ref-picking';
         refInput.classList.add('show');
-      } else if (points.length === 3) {
+      } else {
         stage_state = 'measuring';
-        stepLabel.textContent = 'Step 2 of 2 — Measure';
-        stepText.textContent = 'Tap the two points of the ' + targetField + ' you want to measure.';
+        if (mode === 'single') {
+          stepLabel.textContent = 'Step 2 of 2 — Measure';
+          stepText.textContent = 'Tap the two points of the ' + targetField + ' you want to measure.';
+        } else {
+          stepLabel.textContent = 'Step 2 of 2 — Mark the walls';
+          if (points.length === 3) stepText.textContent = 'Now tap the room corner (where the two walls meet).';
+          else if (points.length === 4) stepText.textContent = 'Now tap the far end of the second wall.';
+        }
       }
       undoBtn.disabled = points.length === 0;
     });
 
     useBtn.addEventListener('click', () => {
-      if (lastMeasuredMeters != null && targetField) {
+      if (mode === 'single' && lastMeasuredMeters != null && targetField) {
         $(targetField).value = lastMeasuredMeters.toFixed(2);
-        recalc();
+      } else if (mode === 'floorplan' && lastLengthMeters != null && lastWidthMeters != null) {
+        $('length').value = lastLengthMeters.toFixed(2);
+        $('width').value = lastWidthMeters.toFixed(2);
       }
+      recalc();
       closeModal();
     });
   })();
