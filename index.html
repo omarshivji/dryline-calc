@@ -12,7 +12,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Dryline" />
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-<link rel="icon" href="icons/icon-192.png" />
+<link rel="icon" href="icons/icon-512.png" />
+
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -55,9 +56,6 @@
     min-height: 100vh;
     padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
     padding-top: calc(20px + env(safe-area-inset-top));
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
     background-size: 40px 40px;
     background-position: -1px -1px;
     -webkit-overflow-scrolling: touch;
@@ -68,7 +66,7 @@
 
   .header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
     padding-bottom: 14px;
@@ -205,7 +203,7 @@
   .layer-btn {
     flex: 1; padding: 10px; text-align: center;
     background: var(--panel-raised); border: 1px solid var(--border);
-    border-radius: 4px; font-family: 'IBM Plex Mono', monospace;
+    border-radius: 4px; font-family: 'Inter', sans-serif;
     font-size: 12px; color: var(--text-dim); cursor: pointer;
   }
   .layer-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,164,76,0.10); }
@@ -253,7 +251,7 @@
   .scan-row { display: flex; gap: 8px; margin-top: 4px; margin-bottom: 10px; }
   .scan-btn {
     flex: 1; background: var(--panel-raised); border: 1px solid var(--border);
-    color: var(--gold-bright); font-size: 11px; padding: 10px 4px; border-radius: 4px;
+    color: var(--gold-bright); font-size: 11px; padding: 10px 4px; border-radius: 4px; !important;
     cursor: pointer; font-family: 'Inter', sans-serif; text-align: center;
   }
   .scan-btn:active { border-color: var(--gold); }
@@ -343,12 +341,11 @@
 <body>
   <div class="shell">
     <div class="header">
-      <h1>DRYLINE<span>Ⓡ</span><br/>MATERIAL CALCULATOR</h1>
+      <img src="icons/icon-513.png" width="70" height="70" alt="" style="margin-right: 8px;"/>
       <div class="header-right">
         <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light mode">
           <span id="themeIcon">☾</span>
         </button>
-        <div class="sub">TAKEOFF ENGINE</div>
       </div>
     </div>
 
@@ -374,7 +371,7 @@
         <button id="scanHeight" class="scan-btn" data-target="height">📷 Scan Height</button>
       </div>
       <div class="scan-row">
-        <button id="uploadPlanBtn" class="scan-btn plan-btn">📐 Upload Floor Plan</button>
+        <button id="uploadPlanBtn" class="scan-btn">📐 Upload Floor Plan</button>
       </div>
       <div class="field-row">
         <div class="field"><label>Doors</label><div class="field-input"><input id="doors" type="number" inputmode="numeric" value="1" step="1"/><span class="unit">qty</span></div></div>
