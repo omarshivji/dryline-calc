@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>DrylineⓇ Material Calculator</title>
+
+<!-- PWA / iOS home screen support -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#14181C" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Dryline" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --bg: #14181C;
+    --panel: #1B2025;
+    --panel-raised: #20262C;
+    --border: #2B323A;
+    --orange: #E0632B;
+    --amber: #E8A34F;
+    --steel: #7A8794;
+    --text: #EDEFF2;
+    --text-dim: #9AA4AE;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
+    padding-top: calc(20px + env(safe-area-inset-top));
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: -1px -1px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .shell { max-width: 640px; margin: 0 auto; }
+
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .header h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .header h1 span { color: var(--orange); }
+  .header .sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .panel-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--steel);
+    margin-bottom: 16px;
+  }
+  .panel-title .dot { color: var(--orange); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+
+  .field label {
+    display: block;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field-input {
+    display: flex;
+    align-items: center;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .field-input:focus-within { border-color: var(--orange); }
+  .field-input input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    padding: 11px 10px;
+    width: 100%;
+    outline: none;
+  }
+  .field-input .unit {
+    font-size: 11px;
+    color: var(--text-dim);
+    padding-right: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .select-row { margin-bottom: 10px; }
+  .select-row label {
+    display: block; font-size: 10.5px; color: var(--text-dim);
+    margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  select {
+    width: 100%;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 11px;
+    border-radius: 4px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-top: 1px solid var(--border); margin-top: 6px;
+  }
+  .toggle-row span { font-size: 13px; color: var(--text-dim); }
+  .toggle {
+    width: 44px; height: 26px; border-radius: 13px;
+    background: var(--panel-raised); border: 1px solid var(--border);
+    position: relative; cursor: pointer; transition: background 0.15s;
+  }
+  .toggle.on { background: var(--orange); border-color: var(--orange); }
+  .toggle .knob {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--text);
+    position: absolute; top: 3px; left: 3px; transition: left 0.15s;
+  }
+  .toggle.on .knob { left: 22px; background: #14181C; }
+
+  .layer-toggle { display: flex; gap: 8px; margin-bottom: 10px; }
+  .layer-btn {
+    flex: 1; padding: 10px; text-align: center;
+    background: var(--panel-raised); border: 1px solid var(--border);
+    border-radius: 4px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; color: var(--text-dim); cursor: pointer;
+  }
+  .layer-btn.active { border-color: var(--orange); color: var(--orange); background: rgba(224,99,43,0.08); }
+
+  .advanced-toggle {
+    display: flex; align-items: center; gap: 6px; font-size: 11px;
+    color: var(--steel); cursor: pointer; margin-top: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px; user-select: none;
+  }
+  .advanced-panel { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); display: none; }
+  .advanced-panel.open { display: block; }
+
+  .docket-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .docket-header h2 {
+    font-family: 'Oswald', sans-serif; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--steel); margin: 0;
+  }
+  .docket-header h2 .dot { color: var(--orange); }
+
+  .copy-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    font-size: 11px; padding: 7px 12px; border-radius: 4px; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .copy-btn:active { border-color: var(--orange); color: var(--orange); }
+
+  .summary-band {
+    background: var(--panel-raised); border: 1px solid var(--border); border-radius: 4px;
+    padding: 12px 8px; margin: 16px 0; display: flex; justify-content: space-between;
+  }
+  .summary-band .item { text-align: center; flex: 1; }
+  .summary-band .item + .item { border-left: 1px solid var(--border); }
+  .summary-band .num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--amber); }
+  .summary-band .lbl { font-size: 8.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  .stat-line { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .stat-line:last-child { border-bottom: none; }
+  .stat-label { font-size: 13px; color: var(--text-dim); }
+  .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text); }
+  .stat-value.hero { font-size: 24px; color: var(--orange); }
+  .stat-note { font-size: 9.5px; color: var(--text-dim); display: block; margin-top: 2px; }
+
+  .footnote { font-size: 9.5px; color: var(--text-dim); margin-top: 14px; line-height: 1.6; font-family: 'IBM Plex Mono', monospace; }
+
+  .scan-row { display: flex; gap: 8px; margin-top: 4px; margin-bottom: 10px; }
+  .scan-btn {
+    flex: 1; background: var(--panel-raised); border: 1px solid var(--border);
+    color: var(--amber); font-size: 11px; padding: 10px 4px; border-radius: 4px;
+    cursor: pointer; font-family: 'Inter', sans-serif; text-align: center;
+  }
+  .scan-btn:active { border-color: var(--orange); }
+
+  /* Scan modal */
+  .scan-modal {
+    display: none;
+    position: fixed; inset: 0; background: #0B0D0F; z-index: 100;
+    flex-direction: column;
+  }
+  .scan-modal.open { display: flex; }
+  .scan-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px; padding-top: calc(14px + env(safe-area-inset-top));
+    border-bottom: 1px solid var(--border);
+  }
+  .scan-topbar .title { font-family: 'Oswald', sans-serif; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--text); }
+  .scan-close { background: none; border: 1px solid var(--border); color: var(--text-dim); border-radius: 4px; padding: 6px 12px; font-size: 12px; }
+
+  .scan-stage {
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+  }
+  .scan-stage canvas { max-width: 100%; max-height: 100%; touch-action: none; }
+  .scan-placeholder { color: var(--text-dim); font-size: 13px; text-align: center; padding: 30px; line-height: 1.6; }
+
+  .scan-instructions {
+    padding: 14px 16px; background: var(--panel);
+    border-top: 1px solid var(--border);
+  }
+  .scan-instructions .step-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--orange);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+  }
+  .scan-instructions .step-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+  .scan-ref-input {
+    display: none;
+    padding: 12px 16px; background: var(--panel-raised); border-top: 1px solid var(--border);
+    align-items: center; gap: 10px;
+  }
+  .scan-ref-input.show { display: flex; }
+  .scan-ref-input label { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+  .scan-ref-input .field-input { flex: 1; }
+  .scan-ref-input button {
+    background: var(--orange); border: none; color: #14181C; font-weight: 600;
+    padding: 10px 16px; border-radius: 4px; font-size: 12px; white-space: nowrap;
+  }
+
+  .scan-bottombar {
+    display: flex; gap: 10px; padding: 14px 16px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border); background: var(--panel);
+  }
+  .scan-action-btn {
+    flex: 1; padding: 13px; border-radius: 4px; font-size: 13px; font-weight: 600;
+    border: 1px solid var(--border); background: var(--panel-raised); color: var(--text-dim);
+  }
+  .scan-action-btn.primary { background: var(--orange); border-color: var(--orange); color: #14181C; }
+  .scan-action-btn:disabled { opacity: 0.4; }
+
+  .scan-result-badge {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(20,24,28,0.9); border: 1px solid var(--orange);
+    color: var(--amber); font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    padding: 6px 14px; border-radius: 20px; display: none;
+  }
+  .scan-result-badge.show { display: block; }
+
+  .install-banner {
+    display: none;
+    background: var(--panel-raised);
+    border: 1px solid var(--orange);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .install-banner.show { display: block; }
+  .install-banner b { color: var(--orange); }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <div class="header">
+      <h1>DRYLINE<span>Ⓡ</span><br/>MATERIAL CALCULATOR</h1>
+      <div class="sub">TAKEOFF ENGINE</div>
+    </div>
+
+    <div id="installBanner" class="install-banner">
+      <b>Add to Home Screen</b> — tap the Share icon below, then "Add to Home Screen" to install this as an app.
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="dot">■</span> ROOM DIMENSIONS</div>
+
+      <div class="field-row">
+        <div class="field"><label>Length</label><div class="field-input"><input id="length" type="number" inputmode="decimal" value="4.0" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Width</label><div class="field-input"><input id="width" type="number" inputmode="decimal" value="3.5" step="0.1"/><span class="unit">m</span></div></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Ceiling Height</label><div class="field-input"><input id="height" type="number" inputmode="decimal" value="2.4" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Wastage</label><div class="field-input"><input id="wastage" type="number" inputmode="decimal" value="10" step="1"/><span class="unit">%</span></div></div>
+      </div>
+
+      <div class="scan-row">
+        <button id="scanLength" class="scan-btn" data-target="length">📷 Scan Length</button>
+        <button id="scanWidth" class="scan-btn" data-target="width">📷 Scan Width</button>
+        <button id="scanHeight" class="scan-btn" data-target="height">📷 Scan Height</button>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Doors</label><div class="field-input"><input id="doors" type="number" inputmode="numeric" value="1" step="1"/><span class="unit">qty</span></div></div>
+        <div class="field"><label>Windows</label><div class="field-input"><input id="windows" type="number" inputmode="numeric" value="1" step="1"/><span class="unit">qty</span></div></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Door area (avg)</label><div class="field-input"><input id="doorArea" type="number" inputmode="decimal" value="1.6" step="0.1"/><span class="unit">m²</span></div></div>
+        <div class="field"><label>Window area (avg)</label><div class="field-input"><input id="windowArea" type="number" inputmode="decimal" value="1.2" step="0.1"/><span class="unit">m²</span></div></div>
+      </div>
+
+      <div class="select-row">
+        <label>Board size</label>
+        <select id="boardSize">
+          <option value="0">2400 × 1200mm — 2.88m² per board</option>
+          <option value="1">2700 × 1200mm — 3.24m² per board</option>
+          <option value="2">3000 × 1200mm — 3.60m² per board</option>
+        </select>
+      </div>
+
+      <div class="select-row">
+        <label>Board layers</label>
+        <div class="layer-toggle">
+          <div id="layer1" class="layer-btn active">Single layer</div>
+          <div id="layer2" class="layer-btn">Double layer</div>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <span>Include insulation</span>
+        <div id="insulationToggle" class="toggle on"><div class="knob"></div></div>
+      </div>
+
+      <div id="advancedToggle" class="advanced-toggle">▾ ADVANCED COVERAGE RATES</div>
+      <div id="advancedPanel" class="advanced-panel">
+        <div class="field-row">
+          <div class="field"><label>Screws</label><div class="field-input"><input id="screwsPerM2" type="number" inputmode="decimal" value="11" step="1"/><span class="unit">/m²</span></div></div>
+          <div class="field"><label>Tape rate</label><div class="field-input"><input id="tapeRate" type="number" inputmode="decimal" value="0.55" step="0.05"/><span class="unit">m/m²</span></div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Compound</label><div class="field-input"><input id="compoundRate" type="number" inputmode="decimal" value="1.1" step="0.1"/><span class="unit">kg/m²</span></div></div>
+          <div class="field"><label>Insul. waste</label><div class="field-input"><input id="insulationWaste" type="number" inputmode="decimal" value="5" step="1"/><span class="unit">%</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="docket-header">
+        <h2><span class="dot">■</span> MATERIALS REQUIRED</h2>
+        <button id="copyBtn" class="copy-btn">Copy quote</button>
+      </div>
+
+      <div class="summary-band">
+        <div class="item"><div class="num" id="netArea">–</div><div class="lbl">Net m² walled</div></div>
+        <div class="item"><div class="num" id="grossArea">–</div><div class="lbl">Gross m²</div></div>
+        <div class="item"><div class="num" id="openArea">–</div><div class="lbl">Openings m²</div></div>
+      </div>
+
+      <div class="stat-line">
+        <div class="stat-label">Plasterboard<span class="stat-note" id="boardNote">–</span></div>
+        <div class="stat-value hero" id="boardsNeeded">–</div>
+      </div>
+      <div class="stat-line">
+        <div class="stat-label">Drywall screws</div>
+        <div class="stat-value" id="screwsOut">–</div>
+      </div>
+      <div class="stat-line">
+        <div class="stat-label">Jointing tape<span class="stat-note" id="tapeNote">–</span></div>
+        <div class="stat-value" id="tapeOut">–</div>
+      </div>
+      <div class="stat-line">
+        <div class="stat-label">Joint compound<span class="stat-note" id="compoundNote">–</span></div>
+        <div class="stat-value" id="compoundOut">–</div>
+      </div>
+      <div class="stat-line" id="insulationLine">
+        <div class="stat-label">Insulation slab</div>
+        <div class="stat-value" id="insulationOut">–</div>
+      </div>
+
+      <div class="footnote">COVERAGE RATES ARE INDUSTRY-STANDARD DEFAULTS — ADJUST UNDER ADVANCED SETTINGS TO MATCH YOUR SUPPLIER'S SPEC SHEET. ALWAYS ROUND UP TO FULL UNITS ON SITE.</div>
+    </div>
+  </div>
+
+  <!-- SCAN MODAL -->
+  <div id="scanModal" class="scan-modal">
+    <div class="scan-topbar">
+      <div class="title" id="scanTitle">Scan Length</div>
+      <button class="scan-close" id="scanClose">Close</button>
+    </div>
+
+    <div class="scan-stage" id="scanStage">
+      <div class="scan-placeholder" id="scanPlaceholder">
+        Take a photo of the wall or floor, straight-on if possible.<br/><br/>
+        You'll then mark a known reference length (a door, a board, a tape measure) to calibrate, then mark the distance you want to measure.
+      </div>
+      <canvas id="scanCanvas" style="display:none;"></canvas>
+      <div class="scan-result-badge" id="scanBadge"></div>
+    </div>
+
+    <div class="scan-instructions" id="scanInstructions" style="display:none;">
+      <div class="step-label" id="scanStepLabel">Step 1</div>
+      <div class="step-text" id="scanStepText">Tap the two ends of a known reference length in the photo (e.g. a door, a board edge).</div>
+    </div>
+
+    <div class="scan-ref-input" id="scanRefInput">
+      <label>Reference is</label>
+      <div class="field-input"><input id="scanRefValue" type="number" inputmode="decimal" value="2.0" step="0.01"/><span class="unit">m</span></div>
+      <button id="scanRefConfirm">Set</button>
+    </div>
+
+    <div class="scan-bottombar">
+      <input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none;" />
+      <button class="scan-action-btn primary" id="scanCaptureBtn">Take Photo</button>
+      <button class="scan-action-btn" id="scanUndoBtn" disabled>Undo Point</button>
+      <button class="scan-action-btn primary" id="scanUseBtn" style="display:none;">Use This Measurement</button>
+    </div>
+  </div>
+
+<script>
+  const BOARDS = [
+    { label: '2400 × 1200mm', area: 2.88 },
+    { label: '2700 × 1200mm', area: 3.24 },
+    { label: '3000 × 1200mm', area: 3.60 },
+  ];
+
+  let layers = 1;
+  let includeInsulation = true;
+
+  const $ = (id) => document.getElementById(id);
+  const val = (id) => parseFloat($(id).value) || 0;
+
+  function recalc() {
+    const length = val('length'), width = val('width'), height = val('height');
+    const doors = val('doors'), windows = val('windows');
+    const doorArea = val('doorArea'), windowArea = val('windowArea');
+    const wastage = val('wastage');
+    const board = BOARDS[$('boardSize').value];
+    const screwsPerM2 = val('screwsPerM2'), tapeRate = val('tapeRate');
+    const compoundRate = val('compoundRate'), insulationWaste = val('insulationWaste');
+
+    const perimeter = 2 * (length + width);
+    const grossWallArea = perimeter * height;
+    const openingsArea = doors * doorArea + windows * windowArea;
+    const netWallArea = Math.max(grossWallArea - openingsArea, 0);
+    const totalBoardArea = netWallArea * layers;
+    const wasteFactor = 1 + wastage / 100;
+    const areaWithWaste = totalBoardArea * wasteFactor;
+    const boardsNeeded = Math.ceil(areaWithWaste / board.area);
+
+    const screws = Math.ceil(totalBoardArea * wasteFactor * screwsPerM2);
+    const jointLength = netWallArea * layers * tapeRate;
+    const tapeRolls = Math.ceil((jointLength * 1.1) / 30);
+    const compoundKg = Math.ceil(netWallArea * layers * compoundRate);
+    const compoundTubs = Math.ceil(compoundKg / 25);
+    const insulationArea = includeInsulation ? Math.ceil(netWallArea * (1 + insulationWaste / 100)) : 0;
+
+    $('netArea').textContent = netWallArea.toFixed(1);
+    $('grossArea').textContent = grossWallArea.toFixed(1);
+    $('openArea').textContent = openingsArea.toFixed(1);
+    $('boardsNeeded').textContent = boardsNeeded;
+    $('boardNote').textContent = `${board.label}, ${layers === 2 ? 'double layer' : 'single layer'}`;
+    $('screwsOut').textContent = screws;
+    $('tapeOut').textContent = `${tapeRolls} roll${tapeRolls !== 1 ? 's' : ''}`;
+    $('tapeNote').textContent = `~${jointLength.toFixed(0)}m needed, 30m rolls`;
+    $('compoundOut').textContent = `${compoundTubs} tub${compoundTubs !== 1 ? 's' : ''}`;
+    $('compoundNote').textContent = `~${compoundKg}kg, 25kg tubs`;
+    $('insulationLine').style.display = includeInsulation ? 'flex' : 'none';
+    $('insulationOut').textContent = `${insulationArea} m²`;
+
+    window._lastResults = { length, width, height, netWallArea, board, layers, boardsNeeded, screws, tapeRolls, jointLength, compoundTubs, compoundKg, includeInsulation, insulationArea, wastage };
+  }
+
+  document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', recalc));
+
+  $('layer1').addEventListener('click', () => { layers = 1; $('layer1').classList.add('active'); $('layer2').classList.remove('active'); recalc(); });
+  $('layer2').addEventListener('click', () => { layers = 2; $('layer2').classList.add('active'); $('layer1').classList.remove('active'); recalc(); });
+
+  $('insulationToggle').addEventListener('click', () => {
+    includeInsulation = !includeInsulation;
+    $('insulationToggle').classList.toggle('on', includeInsulation);
+    recalc();
+  });
+
+  $('advancedToggle').addEventListener('click', () => {
+    const panel = $('advancedPanel');
+    const open = panel.classList.toggle('open');
+    $('advancedToggle').textContent = (open ? '▴' : '▾') + ' ADVANCED COVERAGE RATES';
+  });
+
+  $('copyBtn').addEventListener('click', () => {
+    const r = window._lastResults;
+    if (!r) return;
+    const text = `MATERIAL TAKEOFF — ${r.length}m × ${r.width}m room, ${r.height}m ceiling
+—————————————————————————
+Net wall area: ${r.netWallArea.toFixed(1)} m²
+Plasterboard (${r.board.label}, ${r.layers === 2 ? 'double layer' : 'single layer'}): ${r.boardsNeeded} boards
+Drywall screws: ${r.screws}
+Jointing tape: ${r.tapeRolls} roll(s) (~${r.jointLength.toFixed(0)}m)
+Joint compound: ${r.compoundTubs} tub(s) (~${r.compoundKg}kg)${r.includeInsulation ? `\nInsulation: ${r.insulationArea} m²` : ''}
+—————————————————————————
+Wastage factored: ${r.wastage}%`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        $('copyBtn').textContent = 'Copied ✓';
+        setTimeout(() => $('copyBtn').textContent = 'Copy quote', 2000);
+      });
+    }
+  });
+
+  recalc();
+
+  // Show "Add to Home Screen" hint on iOS Safari when not already installed
+  function isIos() { return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase()); }
+  function isInStandaloneMode() { return ('standalone' in window.navigator) && (window.navigator.standalone); }
+  if (isIos() && !isInStandaloneMode()) {
+    $('installBanner').classList.add('show');
+  }
+
+  // Register service worker for offline use
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    });
+  }
+
+  // ---------- CAMERA SCAN / PHOTO-REFERENCE MEASURE ----------
+  (function () {
+    const modal = $('scanModal');
+    const stage = $('scanStage');
+    const placeholder = $('scanPlaceholder');
+    const canvas = $('scanCanvas');
+    const ctx = canvas.getContext('2d');
+    const fileInput = $('scanFileInput');
+    const captureBtn = $('scanCaptureBtn');
+    const undoBtn = $('scanUndoBtn');
+    const useBtn = $('scanUseBtn');
+    const closeBtn = $('scanClose');
+    const title = $('scanTitle');
+    const instructions = $('scanInstructions');
+    const stepLabel = $('scanStepLabel');
+    const stepText = $('scanStepText');
+    const refInput = $('scanRefInput');
+    const refValue = $('scanRefValue');
+    const refConfirm = $('scanRefConfirm');
+    const badge = $('scanBadge');
+
+    let targetField = null;   // 'length' | 'width' | 'height'
+    let img = null;
+    let points = [];          // pixel points clicked, up to 4: [refA, refB, measA, measB]
+    let stage_state = 'idle'; // idle -> photo -> ref-picking -> ref-set -> measuring -> done
+    let pxPerMeter = null;
+    let scale = 1;            // canvas-to-natural-image scale
+    let lastMeasuredMeters = null;
+
+    function openModal(field) {
+      targetField = field;
+      title.textContent = 'Scan ' + field.charAt(0).toUpperCase() + field.slice(1);
+      resetState();
+      modal.classList.add('open');
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      resetState();
+    }
+    function resetState() {
+      points = [];
+      img = null;
+      pxPerMeter = null;
+      lastMeasuredMeters = null;
+      stage_state = 'idle';
+      canvas.style.display = 'none';
+      placeholder.style.display = 'block';
+      instructions.style.display = 'none';
+      refInput.classList.remove('show');
+      useBtn.style.display = 'none';
+      captureBtn.style.display = 'block';
+      captureBtn.textContent = 'Take Photo';
+      undoBtn.disabled = true;
+      badge.classList.remove('show');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    $('scanLength').addEventListener('click', () => openModal('length'));
+    $('scanWidth').addEventListener('click', () => openModal('width'));
+    $('scanHeight').addEventListener('click', () => openModal('height'));
+    closeBtn.addEventListener('click', closeModal);
+
+    captureBtn.addEventListener('click', () => {
+      if (stage_state === 'idle') {
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        img = new Image();
+        img.onload = () => {
+          drawImageToCanvas();
+          placeholder.style.display = 'none';
+          canvas.style.display = 'block';
+          captureBtn.style.display = 'none';
+          instructions.style.display = 'block';
+          stage_state = 'ref-picking';
+          stepLabel.textContent = 'Step 1 of 2 — Calibrate';
+          stepText.textContent = 'Tap the two ends of something you know the real length of (a door, a board, a tape measure laid flat).';
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+      fileInput.value = '';
+    });
+
+    function drawImageToCanvas() {
+      const maxW = stage.clientWidth;
+      const maxH = stage.clientHeight;
+      const ratio = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight);
+      canvas.width = img.naturalWidth * ratio;
+      canvas.height = img.naturalHeight * ratio;
+      scale = ratio;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      redrawPoints();
+    }
+
+    function redrawPoints() {
+      // redraw base image
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      points.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+        ctx.fillStyle = i < 2 ? '#E8A34F' : '#E0632B';
+        ctx.fill();
+        ctx.strokeStyle = '#14181C';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      // draw line for ref pair
+      if (points.length >= 2) {
+        drawLine(points[0], points[1], '#E8A34F');
+      }
+      if (points.length >= 4) {
+        drawLine(points[2], points[3], '#E0632B');
+      }
+    }
+
+    function drawLine(a, b, color) {
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function canvasPointFromEvent(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height),
+      };
+    }
+
+    function handleCanvasTap(e) {
+      e.preventDefault();
+      if (stage_state !== 'ref-picking' && stage_state !== 'measuring') return;
+      const p = canvasPointFromEvent(e);
+
+      if (stage_state === 'ref-picking') {
+        if (points.length < 2) {
+          points.push(p);
+          undoBtn.disabled = false;
+          redrawPoints();
+          if (points.length === 2) {
+            refInput.classList.add('show');
+            stepText.textContent = 'Now enter the real-world length of what you just marked.';
+          }
+        }
+      } else if (stage_state === 'measuring') {
+        if (points.length < 4) {
+          points.push(p);
+          redrawPoints();
+          if (points.length === 4) {
+            finishMeasurement();
+          }
+        }
+      }
+    }
+
+    canvas.addEventListener('click', handleCanvasTap);
+    canvas.addEventListener('touchend', handleCanvasTap);
+
+    refConfirm.addEventListener('click', () => {
+      const meters = parseFloat(refValue.value);
+      if (!meters || points.length < 2) return;
+      const dx = points[1].x - points[0].x;
+      const dy = points[1].y - points[0].y;
+      const pxDist = Math.sqrt(dx * dx + dy * dy);
+      pxPerMeter = pxDist / meters;
+
+      refInput.classList.remove('show');
+      stage_state = 'measuring';
+      stepLabel.textContent = 'Step 2 of 2 — Measure';
+      stepText.textContent = 'Now tap the two points of the ' + targetField + ' you want to measure.';
+    });
+
+    function finishMeasurement() {
+      const dx = points[3].x - points[2].x;
+      const dy = points[3].y - points[2].y;
+      const pxDist = Math.sqrt(dx * dx + dy * dy);
+      const meters = pxDist / pxPerMeter;
+      lastMeasuredMeters = meters;
+
+      badge.textContent = meters.toFixed(2) + ' m';
+      badge.classList.add('show');
+      stepLabel.textContent = 'Done';
+      stepText.textContent = 'Measured ' + meters.toFixed(2) + 'm. Looks right? Use it, or undo the last point to retry.';
+      useBtn.style.display = 'block';
+      stage_state = 'done';
+    }
+
+    undoBtn.addEventListener('click', () => {
+      if (points.length === 0) return;
+      points.pop();
+      redrawPoints();
+      badge.classList.remove('show');
+      useBtn.style.display = 'none';
+
+      if (points.length < 2) {
+        stage_state = 'ref-picking';
+        refInput.classList.remove('show');
+        stepLabel.textContent = 'Step 1 of 2 — Calibrate';
+        stepText.textContent = 'Tap the two ends of something you know the real length of.';
+      } else if (points.length === 2) {
+        stage_state = 'ref-picking';
+        refInput.classList.add('show');
+      } else if (points.length === 3) {
+        stage_state = 'measuring';
+        stepLabel.textContent = 'Step 2 of 2 — Measure';
+        stepText.textContent = 'Tap the two points of the ' + targetField + ' you want to measure.';
+      }
+      undoBtn.disabled = points.length === 0;
+    });
+
+    useBtn.addEventListener('click', () => {
+      if (lastMeasuredMeters != null && targetField) {
+        $(targetField).value = lastMeasuredMeters.toFixed(2);
+        recalc();
+      }
+      closeModal();
+    });
+  })();
+</script>
+</body>
+</html>
