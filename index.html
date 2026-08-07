@@ -825,12 +825,12 @@ Wastage factored: ${r.wastage}%`;
     startBtn.addEventListener('click', async () => {
       // Check secure context first — camera access is blocked entirely on http://,
       // and no amount of permission-toggling in Settings will fix that.
-      // if (!window.isSecureContext) {
-      //   permissionPanel.style.display = 'none';
-      //   errorPanel.style.display = 'flex';
-      //   errorPanel.innerHTML = 'This page isn\'t loaded over a secure connection (https://).<br/><br/>Camera access is blocked by the browser on http:// pages, even if permission is allowed in Settings. Make sure you\'re opening this app from an https:// link.';
-      //   return;
-      // }
+      if (!window.isSecureContext) {
+        permissionPanel.style.display = 'none';
+        errorPanel.style.display = 'flex';
+        errorPanel.innerHTML = 'This page isn\'t loaded over a secure connection (https://).<br/><br/>Camera access is blocked by the browser on http:// pages, even if permission is allowed in Settings. Make sure you\'re opening this app from an https:// link.';
+        return;
+      }
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         permissionPanel.style.display = 'none';
         errorPanel.style.display = 'flex';
@@ -857,19 +857,19 @@ Wastage factored: ${r.wastage}%`;
         permissionPanel.style.display = 'none';
         errorPanel.style.display = 'flex';
 
-        if (err && err.message === 'motion-denied') {
-          errorPanel.textContent = 'Motion sensor access was denied. This feature needs it to measure angles — please allow it in Settings and try again.';
-        } else if (err && err.name === 'NotAllowedError') {
-          errorPanel.innerHTML = 'Camera access was blocked for this website specifically.<br/><br/>This is separate from the Camera toggle in iOS Settings. In Safari, tap the "aA" icon in the address bar → Website Settings → Camera → Allow, then reload the page. Or go to Settings → Safari → Camera and make sure it\'s not set to Deny.';
-        } else if (err && err.name === 'NotFoundError') {
-          errorPanel.textContent = 'No camera was found on this device.';
-        } else if (err && err.name === 'NotReadableError') {
-          errorPanel.textContent = 'The camera is already in use by another app. Close other apps using the camera and try again.';
-        } else if (err && err.name === 'SecurityError') {
-          errorPanel.textContent = 'Camera access was blocked for security reasons — this usually means the page isn\'t loaded over https://.';
-        } else {
-          errorPanel.textContent = 'Could not access the camera' + (err && err.name ? ' (' + err.name + ')' : '') + '. Check that this site has camera permission in Safari\'s website settings, not just the iOS Settings app.';
-        }
+        // if (err && err.message === 'motion-denied') {
+        //   errorPanel.textContent = 'Motion sensor access was denied. This feature needs it to measure angles — please allow it in Settings and try again.';
+        // } else if (err && err.name === 'NotAllowedError') {
+        //   errorPanel.innerHTML = 'Camera access was blocked for this website specifically.<br/><br/>This is separate from the Camera toggle in iOS Settings. In Safari, tap the "aA" icon in the address bar → Website Settings → Camera → Allow, then reload the page. Or go to Settings → Safari → Camera and make sure it\'s not set to Deny.';
+        // } else if (err && err.name === 'NotFoundError') {
+        //   errorPanel.textContent = 'No camera was found on this device.';
+        // } else if (err && err.name === 'NotReadableError') {
+        //   errorPanel.textContent = 'The camera is already in use by another app. Close other apps using the camera and try again.';
+        // } else if (err && err.name === 'SecurityError') {
+        //   errorPanel.textContent = 'Camera access was blocked for security reasons — this usually means the page isn\'t loaded over https://.';
+        // } else {
+        //   errorPanel.textContent = 'Could not access the camera' + (err && err.name ? ' (' + err.name + ')' : '') + '. Check that this site has camera permission in Safari\'s website settings, not just the iOS Settings app.';
+        // }
       }
     });
 
