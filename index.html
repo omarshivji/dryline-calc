@@ -12,8 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Dryline" />
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-<link rel="icon" href="icons/icon-512.png" />
-
+<link rel="icon" href="icons/icon-192.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -82,9 +81,11 @@
     line-height: 1.2;
   }
   .header h1 span { color: var(--gold); }
+  .brand-mark { display: flex; align-items: center; height: 40px; }
+  .brand-mark img { height: 40px; width: 40px; object-fit: contain; display: block; }
   .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
   .theme-toggle {
-    width: 34px; height: 34px; border-radius: 50%;
+    width: 40px; height: 40px; border-radius: 50%;
     background: var(--panel); border: 1px solid var(--border);
     color: var(--gold); font-size: 15px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -251,7 +252,7 @@
   .scan-row { display: flex; gap: 8px; margin-top: 4px; margin-bottom: 10px; }
   .scan-btn {
     flex: 1; background: var(--panel-raised); border: 1px solid var(--border);
-    color: var(--gold-bright); font-size: 11px; padding: 10px 4px; border-radius: 4px; !important;
+    color: var(--gold-bright); font-size: 11px; padding: 10px 4px; border-radius: 4px;
     cursor: pointer; font-family: 'Inter', sans-serif; text-align: center;
   }
   .scan-btn:active { border-color: var(--gold); }
@@ -336,12 +337,76 @@
   }
   .install-banner.show { display: block; }
   .install-banner b { color: var(--gold); }
+
+  /* Point & Calibrate modal */
+  .pc-stage {
+    flex: 1; position: relative; overflow: hidden; background: #000;
+  }
+  #pcVideo {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .pc-crosshair {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none; width: 100%;
+  }
+  .pc-crosshair-line {
+    position: absolute; left: -1000px; right: -1000px; top: 0;
+    height: 1.5px; background: var(--gold-bright);
+    box-shadow: 0 0 6px rgba(228,200,120,0.8);
+  }
+  .pc-crosshair-dot {
+    position: absolute; top: -4px; left: -4px; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--gold-bright);
+    box-shadow: 0 0 8px rgba(228,200,120,0.9);
+  }
+  .pc-angle-readout {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    background: rgba(10,10,11,0.75); border: 1px solid var(--gold);
+    color: var(--gold-bright); font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px; font-weight: 600; padding: 6px 18px; border-radius: 20px;
+  }
+  .pc-permission {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px;
+    background: rgba(10,10,11,0.92); padding: 30px; text-align: center;
+  }
+  .pc-permission-text { color: var(--text-dim); font-size: 13px; line-height: 1.6; max-width: 280px; }
+  .pc-error {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    padding: 30px; text-align: center; color: var(--text-dim); font-size: 13px; line-height: 1.6;
+    background: rgba(10,10,11,0.92);
+  }
+
+  .pc-height-input {
+    display: none;
+    padding: 12px 16px; background: var(--panel-raised); border-top: 1px solid var(--border);
+    align-items: center; gap: 10px;
+  }
+  .pc-height-input.show { display: flex; }
+  .pc-height-input label { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+  .pc-height-input .field-input { flex: 1; }
+  .pc-height-input button {
+    background: var(--gold); border: none; color: #0A0A0B; font-weight: 600;
+    padding: 10px 16px; border-radius: 4px; font-size: 12px; white-space: nowrap;
+  }
+
+  .pc-results {
+    padding: 14px 16px; background: var(--panel); border-top: 1px solid var(--border);
+  }
+  .pc-result-row {
+    display: flex; justify-content: space-between; padding: 8px 0;
+    font-size: 13px; color: var(--text-dim); border-bottom: 1px solid var(--border);
+  }
+  .pc-result-row:last-child { border-bottom: none; }
+  .pc-result-row b { color: var(--gold); font-family: 'IBM Plex Mono', monospace; font-size: 16px; }
 </style>
 </head>
 <body>
   <div class="shell">
     <div class="header">
-      <img src="icons/icon-513.png" width="70" height="70" alt="" style="margin-right: 8px;"/>
+      <div class="brand-mark">
+        <img src="icons/stud-scan-mark.png" alt="DrylineⓇ Calculator" />
+      </div>
       <div class="header-right">
         <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light mode">
           <span id="themeIcon">☾</span>
@@ -357,29 +422,25 @@
       <div class="panel-title"><span class="dot">■</span> ROOM DIMENSIONS</div>
 
       <div class="field-row">
-        <div class="field"><label>Length</label><div class="field-input"><input id="length" type="number" inputmode="decimal" value="4.0" step="0.1"/><span class="unit">m</span></div></div>
-        <div class="field"><label>Width</label><div class="field-input"><input id="width" type="number" inputmode="decimal" value="3.5" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Length</label><div class="field-input"><input id="length" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Width</label><div class="field-input"><input id="width" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m</span></div></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Ceiling Height</label><div class="field-input"><input id="height" type="number" inputmode="decimal" value="2.4" step="0.1"/><span class="unit">m</span></div></div>
-        <div class="field"><label>Wastage</label><div class="field-input"><input id="wastage" type="number" inputmode="decimal" value="10" step="1"/><span class="unit">%</span></div></div>
+        <div class="field"><label>Ceiling Height</label><div class="field-input"><input id="height" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Wastage</label><div class="field-input"><input id="wastage" type="number" inputmode="decimal" value="" step="1"/><span class="unit">%</span></div></div>
       </div>
 
       <div class="scan-row">
-        <button id="scanLength" class="scan-btn" data-target="length">📷 Scan Length</button>
-        <button id="scanWidth" class="scan-btn" data-target="width">📷 Scan Width</button>
-        <button id="scanHeight" class="scan-btn" data-target="height">📷 Scan Height</button>
-      </div>
-      <div class="scan-row">
+        <button id="pointCalBtn" class="scan-btn">🎯 Point &amp; Calibrate</button>
         <button id="uploadPlanBtn" class="scan-btn">📐 Upload Floor Plan</button>
       </div>
       <div class="field-row">
-        <div class="field"><label>Doors</label><div class="field-input"><input id="doors" type="number" inputmode="numeric" value="1" step="1"/><span class="unit">qty</span></div></div>
-        <div class="field"><label>Windows</label><div class="field-input"><input id="windows" type="number" inputmode="numeric" value="1" step="1"/><span class="unit">qty</span></div></div>
+        <div class="field"><label>Doors</label><div class="field-input"><input id="doors" type="number" inputmode="numeric" value="" step="1"/><span class="unit">qty</span></div></div>
+        <div class="field"><label>Windows</label><div class="field-input"><input id="windows" type="number" inputmode="numeric" value="" step="1"/><span class="unit">qty</span></div></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Door area (avg)</label><div class="field-input"><input id="doorArea" type="number" inputmode="decimal" value="1.6" step="0.1"/><span class="unit">m²</span></div></div>
-        <div class="field"><label>Window area (avg)</label><div class="field-input"><input id="windowArea" type="number" inputmode="decimal" value="1.2" step="0.1"/><span class="unit">m²</span></div></div>
+        <div class="field"><label>Door area (avg)</label><div class="field-input"><input id="doorArea" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m²</span></div></div>
+        <div class="field"><label>Window area (avg)</label><div class="field-input"><input id="windowArea" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m²</span></div></div>
       </div>
 
       <div class="select-row">
@@ -487,6 +548,51 @@
       <button class="scan-action-btn primary" id="scanCaptureBtn">Take Photo</button>
       <button class="scan-action-btn" id="scanUndoBtn" disabled>Undo Point</button>
       <button class="scan-action-btn primary" id="scanUseBtn" style="display:none;">Use This Measurement</button>
+    </div>
+  </div>
+
+  <!-- POINT & CALIBRATE MODAL -->
+  <div id="pointCalModal" class="scan-modal">
+    <div class="scan-topbar">
+      <div class="title">Point &amp; Calibrate</div>
+      <button class="scan-close" id="pcClose">Close</button>
+    </div>
+
+    <div class="pc-stage" id="pcStage">
+      <video id="pcVideo" autoplay playsinline muted></video>
+      <div class="pc-crosshair">
+        <div class="pc-crosshair-line"></div>
+        <div class="pc-crosshair-dot"></div>
+      </div>
+      <div class="pc-angle-readout" id="pcAngleReadout">–°</div>
+      <div class="pc-permission" id="pcPermission">
+        <div class="pc-permission-text">This uses your camera and motion sensor to measure by triangulation — no photo tapping, no guessing.</div>
+        <button class="scan-action-btn primary" id="pcStartBtn">Start</button>
+      </div>
+      <div class="pc-error" id="pcError" style="display:none;"></div>
+    </div>
+
+    <div class="scan-instructions" id="pcInstructions" style="display:none;">
+      <div class="step-label" id="pcStepLabel">Step 1 of 4 — Set your height</div>
+      <div class="step-text" id="pcStepText">Enter the height from the floor to your phone when you hold it up to aim, like you're taking a photo.</div>
+    </div>
+
+    <div class="pc-height-input" id="pcHeightInput">
+      <label>My phone height is</label>
+      <div class="field-input"><input id="pcHeightValue" type="number" inputmode="decimal" value="1.4" step="0.01"/><span class="unit">m</span></div>
+      <button id="pcHeightConfirm">Save</button>
+    </div>
+
+    <div class="pc-results" id="pcResults" style="display:none;">
+      <div class="pc-result-row"><span>Length</span><b id="pcResLength">–</b></div>
+      <div class="pc-result-row"><span>Width</span><b id="pcResWidth">–</b></div>
+      <div class="pc-result-row"><span>Height</span><b id="pcResHeight">–</b></div>
+    </div>
+
+    <div class="scan-bottombar">
+      <button class="scan-action-btn" id="pcRedoBtn" style="display:none;">Redo This Step</button>
+      <button class="scan-action-btn primary" id="pcLockBtn" style="display:none;">Lock Angle</button>
+      <button class="scan-action-btn primary" id="pcApplyBtn" style="display:none;">Apply to Calculator</button>
     </div>
   </div>
 
@@ -630,7 +736,213 @@ Wastage factored: ${r.wastage}%`;
     });
   }
 
-  // ---------- CAMERA SCAN / PHOTO-REFERENCE MEASURE ----------
+  // ---------- POINT & CALIBRATE (sensor-based triangulation) ----------
+  (function () {
+    const modal = $('pointCalModal');
+    const video = $('pcVideo');
+    const closeBtn = $('pcClose');
+    const startBtn = $('pcStartBtn');
+    const permissionPanel = $('pcPermission');
+    const errorPanel = $('pcError');
+    const angleReadout = $('pcAngleReadout');
+    const instructions = $('pcInstructions');
+    const stepLabel = $('pcStepLabel');
+    const stepText = $('pcStepText');
+    const heightInputPanel = $('pcHeightInput');
+    const heightValue = $('pcHeightValue');
+    const heightConfirm = $('pcHeightConfirm');
+    const lockBtn = $('pcLockBtn');
+    const redoBtn = $('pcRedoBtn');
+    const applyBtn = $('pcApplyBtn');
+    const resultsPanel = $('pcResults');
+    const resLength = $('pcResLength');
+    const resWidth = $('pcResWidth');
+    const resHeight = $('pcResHeight');
+
+    let stream = null;
+    let deviceHeight = null;
+    let currentBeta = null;
+    let step = 'idle'; // idle -> height-setup -> length -> width -> height -> done
+    let lengthMeters = null, widthMeters = null, heightMeters = null;
+    let lengthDistance = null; // horizontal distance locked during length step, reused for height calc
+
+    function getSavedHeight() {
+      try { return parseFloat(localStorage.getItem('dryline-device-height')); } catch (e) { return null; }
+    }
+    function saveHeight(h) {
+      try { localStorage.setItem('dryline-device-height', h); } catch (e) {}
+    }
+
+    $('pointCalBtn').addEventListener('click', openPointCal);
+    closeBtn.addEventListener('click', closePointCal);
+
+    function openPointCal() {
+      modal.classList.add('open');
+      resetUI();
+      permissionPanel.style.display = 'flex';
+      errorPanel.style.display = 'none';
+    }
+
+    function closePointCal() {
+      modal.classList.remove('open');
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      window.removeEventListener('deviceorientation', onOrientation);
+      step = 'idle';
+    }
+
+    function resetUI() {
+      instructions.style.display = 'none';
+      heightInputPanel.classList.remove('show');
+      lockBtn.style.display = 'none';
+      redoBtn.style.display = 'none';
+      applyBtn.style.display = 'none';
+      resultsPanel.style.display = 'none';
+      angleReadout.style.display = 'none';
+      lengthMeters = widthMeters = heightMeters = lengthDistance = null;
+    }
+
+    startBtn.addEventListener('click', async () => {
+      try {
+        // Camera
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+
+        // Motion sensor permission (iOS 13+)
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+          const perm = await DeviceOrientationEvent.requestPermission();
+          if (perm !== 'granted') throw new Error('motion-denied');
+        }
+        window.addEventListener('deviceorientation', onOrientation);
+
+        permissionPanel.style.display = 'none';
+        angleReadout.style.display = 'block';
+        beginFlow();
+      } catch (err) {
+        permissionPanel.style.display = 'none';
+        errorPanel.style.display = 'flex';
+        errorPanel.textContent = err && err.message === 'motion-denied'
+          ? 'Motion sensor access was denied. This feature needs it to measure angles — please allow it in Settings and try again.'
+          : 'Could not access the camera. Check camera permissions for this app in your phone settings.';
+      }
+    });
+
+    function onOrientation(e) {
+      if (e.beta == null) return;
+      currentBeta = e.beta;
+      const tilt = currentBeta - 90; // 0 = level with horizon, + = tilted up, - = tilted down
+      angleReadout.textContent = (tilt > 0 ? '+' : '') + tilt.toFixed(1) + '°';
+
+      if (step === 'length' || step === 'width') {
+        const downAngle = -tilt; // positive when aiming below horizon
+        lockBtn.disabled = !(downAngle > 4 && downAngle < 80);
+      } else if (step === 'height') {
+        const upAngle = tilt; // positive when aiming above horizon
+        lockBtn.disabled = !(upAngle > 4 && upAngle < 80);
+      }
+    }
+
+    function beginFlow() {
+      deviceHeight = getSavedHeight();
+      if (!deviceHeight || isNaN(deviceHeight)) {
+        step = 'height-setup';
+        instructions.style.display = 'block';
+        stepLabel.textContent = 'Step 1 of 4 — Set your height';
+        stepText.textContent = 'Enter the height from the floor to your phone when you hold it up to aim, like you\'re taking a photo. Chest to eye height is typical.';
+        heightInputPanel.classList.add('show');
+      } else {
+        startLengthStep();
+      }
+    }
+
+    heightConfirm.addEventListener('click', () => {
+      const h = parseFloat(heightValue.value);
+      if (!h || h < 0.5 || h > 2.5) return;
+      deviceHeight = h;
+      saveHeight(h);
+      heightInputPanel.classList.remove('show');
+      startLengthStep();
+    });
+
+    function startLengthStep() {
+      step = 'length';
+      instructions.style.display = 'block';
+      lockBtn.style.display = 'block';
+      lockBtn.disabled = true;
+      stepLabel.textContent = 'Step 2 of 4 — Length';
+      stepText.textContent = 'Stand at one wall. Aim the crosshair at the base (floor line) of the far wall opposite you, where it meets the floor. Hold steady and tap Lock when the angle reads solid.';
+    }
+
+    function startWidthStep() {
+      step = 'width';
+      lockBtn.disabled = true;
+      stepLabel.textContent = 'Step 3 of 4 — Width';
+      stepText.textContent = 'Turn 90° to face an adjacent wall. Aim the crosshair at its base where it meets the floor, then tap Lock.';
+    }
+
+    function startHeightStep() {
+      step = 'height';
+      lockBtn.disabled = true;
+      stepLabel.textContent = 'Step 4 of 4 — Ceiling height';
+      stepText.textContent = 'Turn back to face the wall you used for Length. This time aim up at the ceiling line, where the wall meets the ceiling, then tap Lock.';
+    }
+
+    lockBtn.addEventListener('click', () => {
+      if (currentBeta == null) return;
+      const tilt = currentBeta - 90;
+
+      if (step === 'length') {
+        const downAngle = -tilt;
+        if (!(downAngle > 4 && downAngle < 80)) return;
+        const rad = downAngle * Math.PI / 180;
+        lengthDistance = deviceHeight / Math.tan(rad);
+        lengthMeters = lengthDistance;
+        flashLock();
+        startWidthStep();
+      } else if (step === 'width') {
+        const downAngle = -tilt;
+        if (!(downAngle > 4 && downAngle < 80)) return;
+        const rad = downAngle * Math.PI / 180;
+        widthMeters = deviceHeight / Math.tan(rad);
+        flashLock();
+        startHeightStep();
+      } else if (step === 'height') {
+        const upAngle = tilt;
+        if (!(upAngle > 4 && upAngle < 80)) return;
+        const rad = upAngle * Math.PI / 180;
+        heightMeters = deviceHeight + lengthDistance * Math.tan(rad);
+        flashLock();
+        finishFlow();
+      }
+    });
+
+    function flashLock() {
+      angleReadout.style.borderColor = '#4CAF50';
+      setTimeout(() => { angleReadout.style.borderColor = ''; }, 300);
+    }
+
+    function finishFlow() {
+      step = 'done';
+      instructions.style.display = 'none';
+      lockBtn.style.display = 'none';
+      resultsPanel.style.display = 'block';
+      resLength.textContent = lengthMeters.toFixed(2) + ' m';
+      resWidth.textContent = widthMeters.toFixed(2) + ' m';
+      resHeight.textContent = heightMeters.toFixed(2) + ' m';
+      applyBtn.style.display = 'block';
+    }
+
+    applyBtn.addEventListener('click', () => {
+      if (lengthMeters != null) $('length').value = lengthMeters.toFixed(2);
+      if (widthMeters != null) $('width').value = widthMeters.toFixed(2);
+      if (heightMeters != null) $('height').value = heightMeters.toFixed(2);
+      recalc();
+      closePointCal();
+    });
+  })();
+
   (function () {
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -701,9 +1013,6 @@ Wastage factored: ${r.wastage}%`;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    $('scanLength').addEventListener('click', () => openModal('single', 'length'));
-    $('scanWidth').addEventListener('click', () => openModal('single', 'width'));
-    $('scanHeight').addEventListener('click', () => openModal('single', 'height'));
     $('uploadPlanBtn').addEventListener('click', () => openModal('floorplan'));
     closeBtn.addEventListener('click', closeModal);
 
