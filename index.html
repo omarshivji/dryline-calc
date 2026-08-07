@@ -422,12 +422,12 @@
       <div class="panel-title"><span class="dot">■</span> ROOM DIMENSIONS</div>
 
       <div class="field-row">
-        <div class="field"><label>Length</label><div class="field-input"><input id="length" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m</span></div></div>
-        <div class="field"><label>Width</label><div class="field-input"><input id="width" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Length</label><div class="field-input"><input id="length" type="number" inputmode="decimal" placeholder="Enter here" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Width</label><div class="field-input"><input id="width" type="number" inputmode="decimal" placeholder="Enter here" step="0.1"/><span class="unit">m</span></div></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Ceiling Height</label><div class="field-input"><input id="height" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m</span></div></div>
-        <div class="field"><label>Wastage</label><div class="field-input"><input id="wastage" type="number" inputmode="decimal" value="" step="1"/><span class="unit">%</span></div></div>
+        <div class="field"><label>Ceiling Height</label><div class="field-input"><input id="height" type="number" inputmode="decimal" placeholder="Enter here" step="0.1"/><span class="unit">m</span></div></div>
+        <div class="field"><label>Wastage</label><div class="field-input"><input id="wastage" type="number" inputmode="decimal" placeholder="Enter here" step="1"/><span class="unit">%</span></div></div>
       </div>
 
       <div class="scan-row">
@@ -435,12 +435,12 @@
         <button id="uploadPlanBtn" class="scan-btn">📐 Upload Floor Plan</button>
       </div>
       <div class="field-row">
-        <div class="field"><label>Doors</label><div class="field-input"><input id="doors" type="number" inputmode="numeric" value="" step="1"/><span class="unit">qty</span></div></div>
-        <div class="field"><label>Windows</label><div class="field-input"><input id="windows" type="number" inputmode="numeric" value="" step="1"/><span class="unit">qty</span></div></div>
+        <div class="field"><label>Doors</label><div class="field-input"><input id="doors" type="number" inputmode="numeric" placeholder="Enter here" step="1"/><span class="unit">qty</span></div></div>
+        <div class="field"><label>Windows</label><div class="field-input"><input id="windows" type="number" inputmode="numeric" placeholder="Enter here" step="1"/><span class="unit">qty</span></div></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Door area (avg)</label><div class="field-input"><input id="doorArea" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m²</span></div></div>
-        <div class="field"><label>Window area (avg)</label><div class="field-input"><input id="windowArea" type="number" inputmode="decimal" value="" step="0.1"/><span class="unit">m²</span></div></div>
+        <div class="field"><label>Door area (avg)</label><div class="field-input"><input id="doorArea" type="number" inputmode="decimal" placeholder="Enter here" step="0.1"/><span class="unit">m²</span></div></div>
+        <div class="field"><label>Window area (avg)</label><div class="field-input"><input id="windowArea" type="number" inputmode="decimal" placeholder="Enter here" step="0.1"/><span class="unit">m²</span></div></div>
       </div>
 
       <div class="select-row">
@@ -618,6 +618,24 @@
     const board = BOARDS[$('boardSize').value];
     const screwsPerM2 = val('screwsPerM2'), tapeRate = val('tapeRate');
     const compoundRate = val('compoundRate'), insulationWaste = val('insulationWaste');
+
+    // Until the core dimensions are entered, show placeholders instead of misleading zeros
+    if (!length || !width || !height) {
+      $('netArea').textContent = '–';
+      $('grossArea').textContent = '–';
+      $('openArea').textContent = '–';
+      $('boardsNeeded').textContent = '–';
+      $('boardNote').textContent = `${board.label}, ${layers === 2 ? 'double layer' : 'single layer'}`;
+      $('screwsOut').textContent = '–';
+      $('tapeOut').textContent = '–';
+      $('tapeNote').textContent = '–';
+      $('compoundOut').textContent = '–';
+      $('compoundNote').textContent = '–';
+      $('insulationLine').style.display = includeInsulation ? 'flex' : 'none';
+      $('insulationOut').textContent = '–';
+      window._lastResults = null;
+      return;
+    }
 
     const perimeter = 2 * (length + width);
     const grossWallArea = perimeter * height;
@@ -805,6 +823,21 @@ Wastage factored: ${r.wastage}%`;
     }
 
     startBtn.addEventListener('click', async () => {
+      // Check secure context first — camera access is blocked entirely on http://,
+      // and no amount of permission-toggling in Settings will fix that.
+      if (!window.isSecureContext) {
+        permissionPanel.style.display = 'none';
+        errorPanel.style.display = 'flex';
+        errorPanel.innerHTML = 'This page isn\'t loaded over a secure connection (https://).<br/><br/>Camera access is blocked by the browser on http:// pages, even if permission is allowed in Settings. Make sure you\'re opening this app from an https:// link.';
+        return;
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        permissionPanel.style.display = 'none';
+        errorPanel.style.display = 'flex';
+        errorPanel.textContent = 'This browser doesn\'t support camera access. Try opening this app in Safari (iPhone) or Chrome (Android).';
+        return;
+      }
+
       try {
         // Camera
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -823,9 +856,20 @@ Wastage factored: ${r.wastage}%`;
       } catch (err) {
         permissionPanel.style.display = 'none';
         errorPanel.style.display = 'flex';
-        errorPanel.textContent = err && err.message === 'motion-denied'
-          ? 'Motion sensor access was denied. This feature needs it to measure angles — please allow it in Settings and try again.'
-          : 'Could not access the camera. Check camera permissions for this app in your phone settings.';
+
+        if (err && err.message === 'motion-denied') {
+          errorPanel.textContent = 'Motion sensor access was denied. This feature needs it to measure angles — please allow it in Settings and try again.';
+        } else if (err && err.name === 'NotAllowedError') {
+          errorPanel.innerHTML = 'Camera access was blocked for this website specifically.<br/><br/>This is separate from the Camera toggle in iOS Settings. In Safari, tap the "aA" icon in the address bar → Website Settings → Camera → Allow, then reload the page. Or go to Settings → Safari → Camera and make sure it\'s not set to Deny.';
+        } else if (err && err.name === 'NotFoundError') {
+          errorPanel.textContent = 'No camera was found on this device.';
+        } else if (err && err.name === 'NotReadableError') {
+          errorPanel.textContent = 'The camera is already in use by another app. Close other apps using the camera and try again.';
+        } else if (err && err.name === 'SecurityError') {
+          errorPanel.textContent = 'Camera access was blocked for security reasons — this usually means the page isn\'t loaded over https://.';
+        } else {
+          errorPanel.textContent = 'Could not access the camera' + (err && err.name ? ' (' + err.name + ')' : '') + '. Check that this site has camera permission in Safari\'s website settings, not just the iOS Settings app.';
+        }
       }
     });
 
